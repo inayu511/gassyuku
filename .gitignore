@@ -1,6 +1,17 @@
 # Environment variables
-.env*.local
-.env.local
 .env
+.env.local
+.env*.local
 
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+build/
+
+# Vercel & Temporary files
 .vercel
+*.log
+git_*.js
