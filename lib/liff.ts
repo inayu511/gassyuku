@@ -3,7 +3,7 @@ import { LiffUserProfile } from '@/types';
 let liffObject: any = null;
 
 export const initLiff = async (): Promise<{ isReady: boolean; profile: LiffUserProfile | null; error: string | null }> => {
-  const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '2011201363-KeBCKcSp';
 
   if (!liffId) {
     console.warn('LIFF_ID is not defined in environment variables.');
