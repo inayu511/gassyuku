@@ -12,6 +12,7 @@ interface RequestModalProps {
   onClose: () => void;
 }
 
+
 export const RequestModal: React.FC<RequestModalProps> = ({
   hotel,
   isOpen,
