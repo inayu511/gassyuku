@@ -1,0 +1,5 @@
+# Keep versioned migrations byte-stable across platforms.
+supabase/migrations/*.sql text eol=lf
+
+# Preserve the quarantined legacy SQL archive byte-for-byte.
+supabase/legacy/*.sql.txt -text
