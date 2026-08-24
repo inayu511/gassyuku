@@ -42,8 +42,6 @@ export interface FilterState {
 }
 
 export interface LiffUserProfile {
-  userId: string;
   displayName: string;
   pictureUrl?: string;
-  statusMessage?: string;
 }
