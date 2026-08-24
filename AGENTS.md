@@ -69,10 +69,10 @@ This file applies to the entire repository. Keep each task within its stated sco
 ## 8. Testing and quality gates
 
 - Run the smallest checks that cover the change, using installed dependencies only. Report every pass, failure, skipped check, and limitation.
-- TypeScript command: `npx --no-install tsc --noEmit --incremental false`. Distinguish pre-existing errors from newly introduced errors; do not let `npx` download anything.
-- Production build command: `npm run build` when the change can affect build/runtime behavior. A successful build is not type/lint proof because `next.config.js` currently ignores those errors during builds.
-- `npm run lint` exists in `package.json`, but ESLint package/configuration is currently absent. Do not trigger interactive setup or claim lint passed; run it only after a separately approved configuration Task.
-- No automated test command/framework currently exists. Do not invent `npm test` or introduce the Task 07 test foundation early.
+- TypeScript command: `npm run typecheck`. Distinguish pre-existing errors from newly introduced errors and do not let `npx` download anything.
+- Production build command: `npm run build` when the change can affect build/runtime behavior. The build runs TypeScript and ESLint checks; do not bypass either gate.
+- ESLint is configured through `eslint-config-next`; run `npm run lint` and do not broadly disable rules.
+- Vitest is configured for automated regression tests. Run `npm test` for relevant application changes and preserve the inquiry-containment negative tests.
 - For catalog changes, smoke-check list, search/filter, detail, and the paused-inquiry notice without sending inquiry data.
 - For RLS/authorization changes, test unauthenticated, non-member, member, officer, and owner actors across at least Circle A/B/C. Verify denial and unchanged rows.
 - Never hide TypeScript or lint failures by changing ignore settings or weakening types. Missing negative tests are a failed security gate.
@@ -107,13 +107,12 @@ Read-only audits, requested local file edits, and local validation are allowed w
 
 ## 12. Known legacy state
 
-- Active runtime code is under `app/`, `components/`, and `lib/`, but tracked root-level duplicates and legacy scripts remain. Several duplicates differ from active files and are still included by the broad TypeScript glob.
-- Root `RakutenHotelCatalog.tsx` is non-adopted legacy, references a missing `lib/rakuten` module, and maps fields incompatibly with the current `Hotel` type. Do not repair or migrate it outside its dedicated cleanup Task.
-- `next.config.js` ignores TypeScript build errors and ESLint during builds; `tsconfig.json` is non-strict. Do not treat this as an accepted quality target.
-- ESLint and an automated test framework are not configured.
+- Active runtime code is under `app/`, `components/`, and `lib/`; the tracked root-level duplicates and legacy scripts were removed in the approved cleanup Task.
+- `next.config.js` does not ignore TypeScript or ESLint failures; `tsconfig.json` remains non-strict. Do not weaken either build gate or hide errors through exclusions.
+- ESLint and Vitest are configured, including inquiry-containment regression tests.
 - `supabase_schema.sql` contains obsolete anonymous inquiry policies and does not match the live database; it is reference-only legacy.
-- `lib/supabase.ts` and its root duplicate contain fixed public environment fallbacks. Do not copy or reveal their values; address them only in the assigned security/configuration Task.
-- The active catalog attempts a read from `public.hotels` and falls back to `lib/mockData.ts` when unavailable.
+- Public Supabase and LIFF configuration comes only from the documented `NEXT_PUBLIC_*` environment variables. Missing or invalid configuration must fail closed without creating the related client or external request.
+- When valid Supabase configuration is present, the active catalog attempts a read from `public.hotels`; otherwise, or when the read is unavailable, it keeps the first-party catalog in `lib/mockData.ts`.
 - Inquiry UI and `/api/notify` are paused. The repository contains `supabase/migrations/20260823121805_emergency_lock_down_inquiries.sql`; repository presence alone does not prove live application state.
 
 ## Code Review Rules

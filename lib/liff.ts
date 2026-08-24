@@ -1,12 +1,11 @@
-import { LiffUserProfile } from '@/types';
+import type { LiffUserProfile } from '@/types';
 
 let liffObject: any = null;
 
 export const initLiff = async (): Promise<{ isReady: boolean; profile: LiffUserProfile | null; error: string | null }> => {
-  const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '2011201363-KeBCKcSp';
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID?.trim();
 
-  if (!liffId) {
-    console.warn('LIFF_ID is not defined in environment variables.');
+  if (!liffId || !/^\d+-\S+$/.test(liffId)) {
     return { isReady: false, profile: null, error: 'LIFF_ID未設定' };
   }
 
@@ -21,15 +20,12 @@ export const initLiff = async (): Promise<{ isReady: boolean; profile: LiffUserP
         return {
           isReady: true,
           profile: {
-            userId: rawProfile.userId,
             displayName: rawProfile.displayName,
             pictureUrl: rawProfile.pictureUrl,
-            statusMessage: rawProfile.statusMessage,
           },
           error: null,
         };
-      } catch (err: any) {
-        console.error('Failed to get LIFF profile:', err);
+      } catch {
         return { isReady: true, profile: null, error: 'プロフィール取得失敗' };
       }
     } else {
@@ -39,9 +35,8 @@ export const initLiff = async (): Promise<{ isReady: boolean; profile: LiffUserP
       }
       return { isReady: true, profile: null, error: null };
     }
-  } catch (err: any) {
-    console.error('LIFF initialization error:', err);
-    return { isReady: false, profile: null, error: err.message || 'LIFF初期化エラー' };
+  } catch {
+    return { isReady: false, profile: null, error: 'LIFF初期化エラー' };
   }
 };
 

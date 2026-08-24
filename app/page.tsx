@@ -36,25 +36,32 @@ export default function HomePage() {
     searchQuery: '',
   });
 
-  // Fetch hotels from Supabase 'hotels' table (Fallback to INITIAL_HOTELS if error/empty)
+  // Fetch hotels from Supabase 'hotels' table (Fallback to INITIAL_HOTELS if unavailable)
   useEffect(() => {
     try {
-      const savedFavs = JSON.parse(localStorage.getItem('gasshuku_favs') || '[]');
-      setFavorites(savedFavs);
-    } catch (e) {
-      console.error('Failed to load favorites', e);
+      const savedFavorites: unknown = JSON.parse(localStorage.getItem('gasshuku_favs') || '[]');
+      setFavorites(
+        Array.isArray(savedFavorites) && savedFavorites.every((item) => typeof item === 'string')
+          ? savedFavorites
+          : []
+      );
+    } catch {
+      setFavorites([]);
     }
 
     const fetchHotels = async () => {
+      if (!supabase) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase.from('hotels').select('*');
         if (data && data.length > 0 && !error) {
           setHotels(data as Hotel[]);
-        } else if (error) {
-          console.warn('Supabase fetch notice (using fallback):', error.message);
         }
-      } catch (err) {
-        console.warn('Using initial fallback hotels:', err);
+      } catch {
+        // Keep the first-party local catalog when the optional remote read is unavailable.
       } finally {
         setIsLoading(false);
       }
@@ -69,8 +76,8 @@ export default function HomePage() {
       const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
       try {
         localStorage.setItem('gasshuku_favs', JSON.stringify(next));
-      } catch (e) {
-        console.error('Failed to save favorites', e);
+      } catch {
+        // Keep the in-memory favorite state when browser storage is unavailable.
       }
       return next;
     });
